@@ -98,7 +98,7 @@ O Python 3.12 e o cURL são disponibilizados no próprio container instalador, n
 ### 1. Clonar o repositório
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/alisson1228/fhir-br-core.git
 cd fhir-br-core
 ```
 
