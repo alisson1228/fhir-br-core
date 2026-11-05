@@ -1,0 +1,77 @@
+
+services:
+  fhir-server:
+    container_name: fhir-br-core-api
+    image: "hapiproject/hapi:v8.12.0-2"
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+
+    configs:
+      - source: hapi_config
+        target: /app/config/application.yaml
+
+    depends_on:
+      - fhir-db
+
+    networks:
+      - fhir-br-core-net
+
+    restart: unless-stopped
+
+  fhir-db:
+    container_name: fhir-br-core-db
+    image: postgres:15-alpine
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      POSTGRES_USER: postgres
+      POSTGRES_DB: hapi
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - fhir-br-core-db-data:/var/lib/postgresql/data
+
+    networks:
+      - fhir-br-core-net
+
+  fhir-ig-installer:
+    container_name: fhir-br-core-installer
+    image: python:3.12-alpine
+    restart: "no"
+
+    working_dir: /workspace
+
+    volumes:
+      - ./:/workspace
+      - fhir-br-core-setup-data:/setup-state
+
+    command: >
+      sh -c "apk add --no-cache curl &&
+      sh /workspace/scripts/install-package.sh"
+
+    depends_on:
+      fhir-server:
+        condition: service_started
+
+    networks:
+      - fhir-br-core-net
+
+configs:
+  hapi_config:
+    file: ./application.yaml
+
+volumes:
+  fhir-br-core-db-data:
+  fhir-br-core-setup-data:
+
+networks:
+  fhir-br-core-net:
+    driver: bridge

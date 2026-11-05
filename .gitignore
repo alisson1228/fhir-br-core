@@ -1,0 +1,12 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Temporary files
+*.tmp
+
+# Generated FHIR package
+fhir-packages/package.r4.json
